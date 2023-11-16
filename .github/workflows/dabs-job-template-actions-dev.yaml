@@ -6,7 +6,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: ../dabs_job_template
+    working-directory: ./dabs_job_template/
 
 on:
   pull_request:
