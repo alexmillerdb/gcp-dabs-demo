@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=bundle_config_schema.json
+# The main job for dabs_job_template
+resources:
+  jobs:
+    dabs_job_template_job:
+      name: dabs_job_template_job
+
+      schedule:
+        quartz_cron_expression: '44 37 8 * * ?'
+        timezone_id: Europe/Amsterdam
+
+      email_notifications:
+        on_failure:
+          - alex.miller@databricks.com
+
+      tasks:
+        - task_key: notebook_task
+          job_cluster_key: job_cluster
+          notebook_task:
+            notebook_path: ../src/notebook.ipynb
+            base_parameters: 
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+        
+        - task_key: main_task
+          depends_on:
+            - task_key: notebook_task
+          
+          job_cluster_key: job_cluster
+          python_wheel_task:
+            package_name: dabs_job_template
+            entry_point: main
+          libraries:
+            # By default we just include the .whl file generated for the dabs_job_template package.
+            # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
+            # for more information on how to add other libraries.
+            - whl: ../dist/*.whl
+
+      job_clusters:
+        - job_cluster_key: job_cluster
+          new_cluster:
+            spark_version: 13.3.x-scala2.12
+            node_type_id: n1-standard-4
+            data_security_mode: USER_ISOLATION
+            autoscale:
+                min_workers: 1
+                max_workers: 4
