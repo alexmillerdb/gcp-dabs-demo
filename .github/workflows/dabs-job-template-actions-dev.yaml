@@ -1,84 +1,48 @@
-# This workflow validates, deploys, and runs the specified bundle
-# within a pre-production target named "dev".
 name: "Dev deployment"
 
-# Ensure that only a single job or workflow using the same concurrency group
-# runs at a time.
-concurrency: 1
+concurrency: 
+  group: dev-deployment
+  cancel-in-progress: true
 
 defaults:
-    run:
-      working-directory: ./dabs_job_template/
+  run:
+    working-directory: ./dabs_job_template
 
-# Trigger this workflow whenever a pull request is opened against the repo's
-# main branch or an existing pull request's head branch is updated.
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - main
+    types: [opened, synchronize]
+    branches: [main]
 
 jobs:
-  # Used by the "pipeline_update" job to deploy the bundle.
-  # Bundle validation is automatically performed as part of this deployment.
-  # If validation fails, this workflow fails.
-  validate:
-    name: "Validate bundle"
+  setup:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - uses: databricks/setup-cli@main
 
+  validate:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
       - run: databricks bundle validate -t dev
-        working-directory: .
         env:
           DATABRICKS_TOKEN: ${{ secrets.DEV_SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: dev
 
   deploy:
-    name: "Deploy bundle"
+    needs: [setup, validate]
     runs-on: ubuntu-latest
-
     steps:
-      # Check out this repo, so that this workflow can access it.
-      - uses: actions/checkout@v3
-
-      # Download the Databricks CLI.
-      # See https://github.com/databricks/setup-cli
-      - uses: databricks/setup-cli@main
-
-      # Deploy the bundle to the "qa" target as defined
-      # in the bundle's settings file.
       - run: databricks bundle deploy -t dev
-        working-directory: .
         env:
           DATABRICKS_TOKEN: ${{ secrets.DEV_SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: dev
 
-  # Validate, deploy, and then run the bundle.
   pipeline_update:
-    name: "Run pipeline update"
+    needs: [setup, deploy]
     runs-on: ubuntu-latest
-
-    # Run the "deploy" job first.
-    needs:
-      - deploy
-
     steps:
-      # Check out this repo, so that this workflow can access it.
-      - uses: actions/checkout@v3
-
-      # Use the downloaded Databricks CLI.
-      - uses: databricks/setup-cli@main
-
-      # Run the Databricks workflow named "my-job" as defined in the
-      # bundle that was just deployed.
-      - run: databricks bundle run -t prod dabs_job_template_job --refresh-all
-        working-directory: .
+      - run: databricks bundle run -t dev dabs_job_template_job --refresh-all
         env:
           DATABRICKS_TOKEN: ${{ secrets.DEV_SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: dev
