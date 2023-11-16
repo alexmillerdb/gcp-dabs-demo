@@ -1,0 +1,31 @@
+name: "New Dev deployment"
+
+# concurrency: 
+#   group: dev-deployment
+#   cancel-in-progress: true
+
+on:
+    pull_request:
+      types: [opened, synchronize]
+      branches: [main]
+    workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./dabs_job_template
+
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: databricks/setup-cli@main
+      - name: Validate Bundle for Dev
+        run: databricks bundle validate -t dev
+      - name: Deploy Bundle to Dev
+        run: databricks bundle deploy -t dev
+      - name: Run Bundle in Dev
+        run: databricks bundle run -t dev dabs_job_template_job --refresh-all
+        env:
+            DATABRICKS_TOKEN: ${{ secrets.DEV_SP_TOKEN }}
+            DATABRICKS_BUNDLE_ENV: dev
