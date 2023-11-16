@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=bundle_config_schema.json
 # The main job for dabs_job_template
 resources:
   jobs:
@@ -17,6 +18,8 @@ resources:
           job_cluster_key: job_cluster
           notebook_task:
             notebook_path: ../src/notebook.ipynb
+            base_parameters: 
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
         
         - task_key: main_task
           depends_on:
