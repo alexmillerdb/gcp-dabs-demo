@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: ./mlops_stacks/
+    working-directory: ./my-mlops-project/mlops_stacks/
 
 env:
   STAGING_WORKSPACE_TOKEN: ${{ secrets.STAGING_WORKSPACE_TOKEN }}
