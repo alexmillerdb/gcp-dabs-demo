@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=bundle_config_schema.json
+# yaml-language-server: $schema=../bundle_config_schema.json
 # The main job for dabs_job_template
 resources:
   jobs:
@@ -34,6 +34,8 @@ resources:
             # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
             # for more information on how to add other libraries.
             - whl: ../dist/*.whl
+
+        
 
       job_clusters:
         - job_cluster_key: job_cluster

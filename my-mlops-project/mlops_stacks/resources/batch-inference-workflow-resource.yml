@@ -3,7 +3,7 @@ new_cluster: &new_cluster
     num_workers: 3
     spark_version: 13.3.x-cpu-ml-scala2.12
     node_type_id: n2-standard-32
-    data_security_mode: SINGLE_USERR
+    data_security_mode: SINGLE_USER
     custom_tags:
       clusterSource: mlops-stack
 
@@ -32,7 +32,7 @@ resources:
       schedule:
         quartz_cron_expression: "0 0 11 * * ?" # daily at 11am
         timezone_id: UTC
-      <<: *permissions
+      # <<: *permissions
       # If you want to turn on notifications for this job, please uncomment the below code,
       # and provide a list of emails to the on_failure argument.
       #
