@@ -3,7 +3,7 @@ new_cluster: &new_cluster
     num_workers: 3
     spark_version: 13.3.x-cpu-ml-scala2.12
     node_type_id: n2-standard-32
-    data_security_mode: SINGLE_USERR
+    data_security_mode: SINGLE_USER
     custom_tags:
       clusterSource: mlops-stack
 
